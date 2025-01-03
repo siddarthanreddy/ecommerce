@@ -8,28 +8,75 @@ Here’s the step-by-step process to get the database ready:
 2. Create a new database named `ecommerce_db`.
 3. Run the following SQL query to create the necessary tables:
 
+
+### **SQL Commands and Table Explanation**
+
+#### 1. **Cart Table**
+```sql
+CREATE TABLE cart (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
+- **Purpose**: Tracks products added to a user's cart.
+- **Columns**:
+  - `id`: Unique identifier for each cart entry.
+  - `user_id`: References the user who added the product.
+  - `product_id`: References the product added to the cart.
+  - `quantity`: Specifies the number of units.
+  - `created_at`: Timestamp when the entry was created.
+  - `updated_at`: Timestamp updated whenever the entry is modified.
+
+---
+
+#### 2. **Products Table**
+```sql
+CREATE TABLE products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    description TEXT,
+    image VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+- **Purpose**: Stores product details.
+- **Columns**:
+  - `id`: Unique identifier for each product.
+  - `name`: Name of the product.
+  - `price`: Cost of the product.
+  - `description`: Details about the product.
+  - `image`: Path to the product image.
+  - `created_at`: Timestamp when the product was added.
+
+---
+
+#### 3. **Users Table**
 ```sql
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE products (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    price DECIMAL(10, 2) NOT NULL,
-    image VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    role ENUM('user', 'admin') DEFAULT 'user'
 );
 ```
 
-**Explanation**:
-- The `users` table stores user information like username, email, and hashed passwords.
-- The `products` table stores product details, such as name, description, price, and image filenames.
+- **Purpose**: Manages user information.
+- **Columns**:
+  - `id`: Unique identifier for each user.
+  - `username`: User's display name.
+  - `email`: User's email address (must be unique).
+  - `password`: Hashed password for security.
+  - `created_at`: Timestamp when the user registered.
+  - `role`: Defines the user's role (`user` or `admin`).
 
 ---
 
