@@ -1,17 +1,18 @@
-### Step-by-Step Guide to Build the Login Page (`login.php`)
+### Step-by-Step Documentation for the Login Page
 
-The **Login Page** allows users to access their accounts. Here's how to build it:
+Below is the aligned and updated documentation for creating the `login.php` page, based on the actual code.
 
 ---
 
-### **Step 1: Create the `login.php` File**
+#### Step 1: Create the `login.php` File
 1. Inside the `pages` folder, create a file named `login.php`.
 
 ---
 
-### **Step 2: Structure the HTML Form**
+#### Step 2: Structure the HTML Form
 Add the following code to create the login form:
 
+**HTML Form for Login**
 ```php
 <!DOCTYPE html>
 <html lang="en">
@@ -19,103 +20,130 @@ Add the following code to create the login form:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="../css/style.css"> <!-- Link your CSS file -->
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        label {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            display: block;
+        }
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .error-message {
+            color: #e74c3c;
+            font-size: 1em;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
+    <div class="login-container">
         <h2>Login</h2>
-        <form action="" method="POST">
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
+        <form method="POST">
+            <label>Email:</label>
+            <input type="email" name="email" required>
+            <label>Password:</label>
+            <input type="password" name="password" required>
             <button type="submit" name="login">Login</button>
         </form>
-        <p>Don't have an account? <a href="register.php">Register here</a>.</p>
+        <?php if (isset($error_message)): ?>
+            <p class="error-message"><?= htmlspecialchars($error_message); ?></p>
+        <?php endif; ?>
     </div>
 </body>
 </html>
 ```
 
-- **Explanation**:
-  - The form uses the `POST` method for secure data submission.
-  - Includes fields for `email` and `password`.
-  - A link to the **Register** page is provided for new users.
-
 ---
 
-### **Step 3: Add PHP Logic for Login**
-Below the HTML, add PHP code to handle login requests:
+#### Step 3: Add PHP Logic for Login
+Include this PHP script at the top of the file to handle user login requests:
 
+**PHP Script for Handling Login**
 ```php
 <?php
+include('../includes/db.php');  // Include the database connection
 session_start();
-include '../includes/db.php'; // Include the database connection
 
 if (isset($_POST['login'])) {
-    // Capture form data
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
-    $password = mysqli_real_escape_string($conn, $_POST['password']);
+    $email = $_POST['email'];
+    $password = $_POST['password'];
 
-    // Check if the user exists
-    $sql = "SELECT * FROM users WHERE email='$email'";
-    $result = $conn->query($sql);
+    // Prepare the SQL query
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($result->num_rows > 0) {
-        $user = $result->fetch_assoc();
-
-        // Verify the password
-        if (password_verify($password, $user['password'])) {
-            // Store user details in session
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['role'] = $user['role'];
-
-            // Redirect based on user role
-            if ($user['role'] === 'admin') {
-                header('Location: ../admin/dashboard.php');
-            } else {
-                header('Location: ../index.php');
-            }
-            exit();
-        } else {
-            echo "<script>alert('Incorrect password. Please try again.');</script>";
-        }
+    if ($user && password_verify($password, $user['password'])) {
+        // Successful login
+        $_SESSION['user_id'] = $user['id']; // Store user ID in session
+        header("Location: ../index.php"); // Redirect to the main page
+        exit();
     } else {
-        echo "<script>alert('No account found with that email.');</script>";
+        // Invalid login
+        $error_message = "Invalid email or password.";
     }
 }
 ?>
 ```
 
-- **Explanation**:
-  - `password_verify()` is used to compare the entered password with the hashed password in the database.
-  - A session is started to store the user’s details after successful login.
-  - Redirects the user to the appropriate page based on their role (`admin` or `user`).
-
 ---
 
-### **Step 4: Add Styling**
-In your `css/style.css` file, the styles for the login page are already covered if you used the same layout as the registration page.
-
----
-
-### **Step 5: Test the Login Page**
+#### Step 4: Test the Login Page
 1. Start your local server.
 2. Navigate to `http://localhost/ecommerce/pages/login.php`.
 3. Use the credentials of a registered user to log in.
-4. Test for both `user` and `admin` roles:
-   - Admins should be redirected to the admin dashboard.
-   - Regular users should be redirected to the homepage.
+4. Verify successful login:
+   - Users are redirected to the homepage.
+   - Invalid credentials show an error message.
 
 ---
 
-### Next Steps:
-Once the login page is complete:
-1. Build the **Admin Dashboard (`dashboard.php`)**.
-2. Implement a **Logout System** to end the session when users log out.
+### Next Steps
+1. Implement the **Logout System** (`logout.php`) to allow users to securely log out.
+2. Build the **Index Page** (`index.php`).
 
