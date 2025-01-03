@@ -1,17 +1,12 @@
+### Step-by-Step Documentation for Database Setup
 
-### Let’s Start with the Database Setup
-
-Here’s the step-by-step process to get the database ready:
 
 #### Step 1: Creating the Database
-1. Open **phpMyAdmin** (or any database management tool).
-2. Create a new database named `ecommerce_db`.
-3. Run the following SQL query to create the necessary tables:
+1. Open **phpMyAdmin** or any database management tool.
+2. Create a new database named `ecommerce`.
+3. Run the following SQL commands to create the necessary tables:
 
-
-### **SQL Commands and Table Explanation**
-
-#### 1. **Cart Table**
+**Cart Table**
 ```sql
 CREATE TABLE cart (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -23,18 +18,7 @@ CREATE TABLE cart (
 );
 ```
 
-- **Purpose**: Tracks products added to a user's cart.
-- **Columns**:
-  - `id`: Unique identifier for each cart entry.
-  - `user_id`: References the user who added the product.
-  - `product_id`: References the product added to the cart.
-  - `quantity`: Specifies the number of units.
-  - `created_at`: Timestamp when the entry was created.
-  - `updated_at`: Timestamp updated whenever the entry is modified.
-
----
-
-#### 2. **Products Table**
+**Products Table**
 ```sql
 CREATE TABLE products (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -46,18 +30,7 @@ CREATE TABLE products (
 );
 ```
 
-- **Purpose**: Stores product details.
-- **Columns**:
-  - `id`: Unique identifier for each product.
-  - `name`: Name of the product.
-  - `price`: Cost of the product.
-  - `description`: Details about the product.
-  - `image`: Path to the product image.
-  - `created_at`: Timestamp when the product was added.
-
----
-
-#### 3. **Users Table**
+**Users Table**
 ```sql
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -69,15 +42,6 @@ CREATE TABLE users (
 );
 ```
 
-- **Purpose**: Manages user information.
-- **Columns**:
-  - `id`: Unique identifier for each user.
-  - `username`: User's display name.
-  - `email`: User's email address (must be unique).
-  - `password`: Hashed password for security.
-  - `created_at`: Timestamp when the user registered.
-  - `role`: Defines the user's role (`user` or `admin`).
-
 ---
 
 #### Step 2: Setting Up `db.php`
@@ -85,25 +49,26 @@ CREATE TABLE users (
 2. Inside this folder, create a file named `db.php`.
 3. Add the following code:
 
+**`db.php`**
 ```php
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "ecommerce_db";
+$host = 'localhost';
+$dbname = 'ecommerce';
+$user = 'root';
+$password = '';
 
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+try {
+    $conn = new PDO("mysql:host=$host;dbname=$dbname", $user, $password);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    echo "Connection failed: " . $e->getMessage();
 }
 ?>
 ```
 
 **Explanation**:
-- This file establishes a connection to the database using MySQLi.
-- If the connection fails, an error message is displayed.
+- This script uses the **PDO (PHP Data Objects)** method for connecting to the database.
+- If the connection fails, an error message will be displayed.
 
 ---
 
@@ -111,6 +76,7 @@ if ($conn->connect_error) {
 1. Create a new file named `test_db.php` in the root folder.
 2. Add the following code to test the connection:
 
+**`test_db.php`**
 ```php
 <?php
 include 'includes/db.php';
@@ -128,7 +94,7 @@ if ($conn) {
 
 ---
 
-### Next Steps:
+### Next Steps
 Once the database is set up:
 1. Move to the **Registration Page (`register.php`)** so users can create accounts.
 2. Build the **Login Page (`login.php`)** to authenticate users.
