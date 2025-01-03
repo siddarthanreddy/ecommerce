@@ -101,4 +101,4 @@ Add CSS to style the cart page:
 
 ---
 
-Next Step is Checkout Page
+Next Step is Admin Dashboard Pages
