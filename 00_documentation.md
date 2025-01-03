@@ -1,6 +1,3 @@
-### **Updated Documentation: `00_Overview.md`**
-
----
 
 ### **Project Overview**
 This project involves building an e-commerce website with two user roles: **Admin** and **Customer**. The primary functionalities include user management, product display, cart operations, and admin-specific controls like adding and managing products.
