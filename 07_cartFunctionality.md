@@ -1,7 +1,7 @@
 
 
 ### **Step 1: Modify the Add to Cart Button**
-Check how the `index.php` provided in the zip is structured. The `Add to Cart` button may already interact with an existing functionality. Typically, this involves:
+The `Add to Cart` button may already interact with an existing functionality. Typically, this involves:
 
 1. A form for submitting product details (e.g., product ID and quantity).
 2. Redirecting the data to an existing script or function that updates the database.
