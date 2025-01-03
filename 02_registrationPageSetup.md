@@ -1,17 +1,18 @@
-### Step-by-Step Guide to Build the Registration Page (`register.php`)
+### Step-by-Step Documentation for the Registration Page
 
-The **Registration Page** allows new users to create an account. Here’s how to build it:
+Below is the updated and aligned documentation for creating the `register.php` page, incorporating the actual code.
 
 ---
 
-### **Step 1: Create the `register.php` File**
+#### Step 1: Create the `register.php` File
 1. Inside the `pages` folder, create a file named `register.php`.
 
 ---
 
-### **Step 2: Structure the HTML Form**
+#### Step 2: Structure the HTML Form
 Add the following code to create the registration form:
 
+**HTML Form for Registration**
 ```php
 <!DOCTYPE html>
 <html lang="en">
@@ -19,151 +20,131 @@ Add the following code to create the registration form:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
-    <link rel="stylesheet" href="../css/style.css"> <!-- Link your CSS file -->
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .register-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        label {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            display: block;
+        }
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .error-message {
+            color: #e74c3c;
+            font-size: 1em;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
+    <div class="register-container">
         <h2>Register</h2>
-        <form action="" method="POST">
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
+        <form method="POST">
+            <label>Email:</label>
+            <input type="email" name="email" required>
+            <label>Password:</label>
+            <input type="password" name="password" required>
             <button type="submit" name="register">Register</button>
         </form>
+        <?php if (isset($error_message)): ?>
+            <p class="error-message"><?= htmlspecialchars($error_message); ?></p>
+        <?php endif; ?>
     </div>
 </body>
 </html>
 ```
 
-- **Explanation**:
-  - The form uses the `POST` method for secure data submission.
-  - Fields include `username`, `email`, and `password`.
-  - The `name="register"` attribute is used to identify when the form is submitted.
-
 ---
 
-### **Step 3: Add PHP Logic for Registration**
-Below the HTML, add PHP code to handle form submissions:
+#### Step 3: Add PHP Logic for Registration
+Add this PHP script at the top of the file to handle user registration:
 
+**PHP Script for Handling Registration**
 ```php
 <?php
-include '../includes/db.php'; // Include the database connection
+include('../includes/db.php');  // Database connection
+session_start();
 
 if (isset($_POST['register'])) {
-    // Capture form data
-    $username = mysqli_real_escape_string($conn, $_POST['username']);
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
-    $password = mysqli_real_escape_string($conn, $_POST['password']);
-    
-    // Hash the password
-    $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+    $email = $_POST['email'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT); // Hash the password
+    $role = 'user'; // Default role for users
 
-    // Check if email already exists
-    $checkEmail = "SELECT * FROM users WHERE email='$email'";
-    $result = $conn->query($checkEmail);
+    // Check if the email already exists
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($result->num_rows > 0) {
-        echo "<script>alert('Email already exists. Please try another email.');</script>";
+    if ($user) {
+        echo "<script>alert('Email is already registered!');</script>";
     } else {
-        // Insert user into the database
-        $sql = "INSERT INTO users (username, email, password) VALUES ('$username', '$email', '$hashedPassword')";
-        
-        if ($conn->query($sql) === TRUE) {
-            echo "<script>alert('Registration successful!'); window.location.href='login.php';</script>";
-        } else {
-            echo "<script>alert('Error: " . $conn->error . "');</script>";
-        }
+        // Insert new user
+        $stmt = $conn->prepare("INSERT INTO users (email, password, role) VALUES (?, ?, ?)");
+        $stmt->execute([$email, $password, $role]);
+
+        // Log the user in after successful registration
+        $_SESSION['user_id'] = $conn->lastInsertId();
+        header("Location: ../index.php"); // Redirect to the homepage
+        exit();
     }
 }
 ?>
 ```
 
-- **Explanation**:
-  - Use `mysqli_real_escape_string` to sanitize user input and prevent SQL injection.
-  - Use `password_hash()` for secure password storage.
-  - Check if the email already exists to prevent duplicate accounts.
-  - Insert the new user into the `users` table upon successful validation.
-
 ---
 
-### **Step 4: Add CSS for Styling**
-In your `css/style.css` file, add some basic styling for the form:
-
-```css
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-}
-
-.container {
-    width: 100%;
-    max-width: 400px;
-    margin: 50px auto;
-    padding: 20px;
-    background: white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    border-radius: 5px;
-}
-
-h2 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    margin: 0;
-    box-sizing: border-box;
-}
-
-button {
-    width: 100%;
-    padding: 10px;
-    background: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #0056b3;
-}
-```
-
----
-
-### **Step 5: Test the Registration Page**
+#### Step 4: Test the Registration Page
 1. Start your local server.
 2. Navigate to `http://localhost/ecommerce/pages/register.php`.
-3. Fill out the form and submit it.
-4. Check the database to confirm the new user is registered.
+3. Register using an email and password.
+4. Check the `users` table in your database to ensure the new user has been added.
 
 ---
 
-### Next Steps:
-Once the registration page is complete:
-1. Build the **Login Page (`login.php`)**.
-2. Implement session management for logged-in users.
+### Next Steps
+1. Build the **Login Page (`login.php`)** for user authentication.
+2. Implement session management to maintain user sessions.
